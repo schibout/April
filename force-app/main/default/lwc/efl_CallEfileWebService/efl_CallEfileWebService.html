@@ -1,0 +1,68 @@
+<!--Created By Keshav on 6/20/2020-->
+<template>
+    <div class="slds-col modal-header slds-modal__header">
+        <h2 class="title slds-text-heading--medium">Mega Login</h2>
+    </div>
+    <!-- Screen 1-->
+    <div if:false={screenDisplay}>
+        
+        <lightning-record-edit-form record-id={currentUserId} object-api-name="User"  onsubmit={handleSubmit} onsuccess={handleSuccess}>
+            <div class="slds-col modal-body scrollable slds-p-around--medium" style="height: 340px; max-height: 400px; overflow-y: auto !important">
+                <lightning-messages></lightning-messages>
+                <lightning-input-field field-name="MegaUserName__c" required></lightning-input-field>
+                <lightning-input type='password' required label='Mega Password' value={pwdVal} onchange={savePWD}></lightning-input>
+
+                <lightning-input-field field-name="MegaToken__c" style="display: none;"></lightning-input-field>
+            </div>
+
+            <div class="slds-col modal-footer slds-modal__footer">
+                <lightning-button class="slds-m-top_small" variant="brand" type="submit" label="Next" disabled={pwdRequired}></lightning-button>
+            </div>
+        </lightning-record-edit-form>
+        
+    </div>
+        <!-- Screen 2-->
+    <div if:true={screenDisplay}>
+        <div class="slds-col modal-body scrollable slds-p-around--medium" style="height: 340px; max-height: 400px; overflow-y: auto !important">
+            <c-gen_-custom-look-up object-name='Account' field-name='Name' rt-name='Underwriter'  onselected={selectedRecords} -label='Underwriter'></c-gen_-custom-look-up>
+            UnderWriter Code : {selectRefRecordUnderWriter}
+            <div class="slds-grid slds-gutters slds-wrap">
+                <div class="slds-col type" >
+                    <label class="slds-form-element__label">Type</label>
+                    <div class="slds-select_container">
+                        <select class="slds-select" onchange={selectionChangeHandler}>
+                            <option value="">--Choose--</option>
+                            <option value="Application">Quote</option>
+                            <option value="Policy">Policy</option>
+                             <option value="Log">LOG</option> 
+                            <option value="Claim">Claim</option>
+                            <!--<option value="Corpclient">CorpClient</option>-->
+
+                        </select>
+                    </div>
+                </div>
+                <div class="slds-col">
+                    <!--div if:true={verifyStart}>should start with selected underwriter code </div-->
+                    <c-gen_-custom-look-up object-name='{setLookupFilter}' field-name='Name' 
+                    rt-name='' onselected={selectedRecordRefNumber} label='Ref Number' 
+                    under-writer='{selectRefRecordUnderWriter}' number-of-records='{numOfRecords}' disabled-field='{disableRef}'  onchange={typevaluechanged}></c-gen_-custom-look-up>
+                    <div if:true={applicationFormat}>Underwriter code-AXXXXX (5 digits) </div>
+                    <div if:true={claimFormat}>Underwriter code-XXXXX (6 digits)  </div> 
+                    <!--to be used when value is not selected {typedTxt}--> 
+                </div>
+            </div> 
+        </div>
+        <div class="slds-col modal-footer slds-modal__footer">
+            <lightning-button class="slds-m-top_small slds-m-right_small" variant="brand"  label="Cancel" onclick={handlePrevious}></lightning-button>
+            <lightning-button class="slds-m-top_small " variant="brand-outline"  label="Ready" onclick={handleSendToWebService} disabled={verifyStart}></lightning-button>
+        </div>
+    </div>
+
+    <div if:true={isLoaded} class="slds-is-relative spinner">
+        <lightning-spinner
+            alternative-text="Loading..." variant="brand">
+        </lightning-spinner>
+    </div>
+    
+    
+</template>

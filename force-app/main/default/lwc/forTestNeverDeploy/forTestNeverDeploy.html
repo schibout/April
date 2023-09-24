@@ -1,0 +1,50 @@
+<!--<template>
+    <lightning-button label="for test never deploy" title="Non-primary action" onclick={test} class="slds-m-left_x-small"></lightning-button>   
+</template> -->
+
+
+<template>
+    <div class="slds-grid">
+    <lightning-button label="Delete Files" variant="brand" onclick={openModal}  class="slds-col slds-size_2-of-2"></lightning-button>
+</div>
+    <template if:true={isModalOpen} class="slds-border_top" style="border: 4px solid blue">
+      
+
+
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium"
+                aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1"
+                style="border: 4px solid blue">
+
+                <div class="slds-modal__container">
+                    <!-- Modal/Popup Box LWC header here -->
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                            title="Close" onclick={closeModal}>
+                            <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse"
+                                size="small"></lightning-icon>
+                            <span class="slds-assistive-text">Close</span>
+                        </button>
+                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Delete Files</h2>
+                    </header>
+                    <!-- Modal/Popup Box LWC body starts here -->
+                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                        <lightning-datatable key-field="id" data={files} columns={columns}
+                            onrowaction={handleRowAction}>
+
+
+                            <lightning-button variant="brand" label="Delete" title="Primary action"
+                                onclick={deleteFirstFile} class="slds-m-left_x-small">
+                            </lightning-button>
+
+                        </lightning-datatable>
+                    </div>
+                    <!-- Modal/Popup Box LWC footer starts here -->
+                    <footer class="slds-modal__footer">
+                      
+                        <button class="slds-button slds-button_brand" onclick={refresh} title="OK">Save</button>
+                    </footer>
+                </div>
+            </section>
+       
+    </template>
+</template>

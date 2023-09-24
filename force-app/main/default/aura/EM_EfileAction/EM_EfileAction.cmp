@@ -1,0 +1,5 @@
+<aura:component implements="force:lightningQuickActionWithoutHeader,force:hasRecordId">
+    <aura:attribute name="inputValue" type="Boolean" default="false"/>
+    <c:efl_CallEfileWebService recordId="{!v.recordId}" onvaluechange="{!c.getValueFromLwc}"/>
+    <!--The value from Lwc is :- {!v.inputValue}-->
+</aura:component>

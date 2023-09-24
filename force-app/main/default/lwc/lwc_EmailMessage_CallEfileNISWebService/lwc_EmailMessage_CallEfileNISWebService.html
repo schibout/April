@@ -1,0 +1,75 @@
+<!-- created by MTK (based on Keshav code) -->
+<template>
+    <div class="slds-is-relative">
+        <div class="slds-col modal-header slds-modal__header">
+            <h2 class="title slds-text-heading--medium">Efiling to NIS</h2>
+        </div>
+
+        <div class="slds-col modal-body scrollable slds-p-around--medium"
+            style="height: 200px; max-height: 350px; overflow-y: auto !important">
+            <!--#underwritter-->
+                <!-- <c-gen_-custom-look-up object-name="Account" field-name="Name" rt-name="Underwriter"
+                    onselected={handleAccountSelected} onreset={handleAccountLookupReset} -label="Underwriter">
+                </c-gen_-custom-look-up>
+                UnderWriter Code : {selectedAccount.underWriter} --> 
+            <!--#underwritter-->
+            <div class="slds-grid slds-gutters slds-wrap">
+                <div class="slds-col type">
+                    <label class="slds-form-element__label">Type</label>
+                    <div class="slds-select_container">
+                        <select class="slds-select" onchange={handleObjectTypeSelectionChange}>
+                            <template for:each={objectTypes} for:item="objectType">
+                                <option key={objectType.value} value={objectType.value}>{objectType.label}</option>
+                             </template>
+                        </select>
+                    </div>
+                </div>
+                <div class="slds-col">
+                  <div if:true={selectedObject.isCorpclientObject}>
+                    <c-gen_-custom-look-up data-id="object-lookup" object-name='{selectedObject.type}' field-name='TECHKEY_ID_MEGA_Account__c'
+                         onselected={handleObjectSelected} ontypevaluechanged={handleObjectTyped} onreset={handleObjectLookupReset}  rt-name='{selectedObject.recordType}'
+                         -label='Ref Number' number-of-records='100' disabled-field='{objectLookupDisabled}'> 
+                        <!-- #underwritter : if you rollback underWriter, put this params in the element :
+                            under-writer='{selectedAccount.underWriter}'
+                            onchange={handleObjectReferenceChange}
+                         --> 
+                    </c-gen_-custom-look-up>
+                   </div>
+                   <div if:false={selectedObject.isCorpclientObject}>
+                        <div if:true={selectedObject.isQuote}>
+                            <c-gen_-custom-look-up data-id="object-lookup" object-name='{selectedObject.type}' field-name='ApplicationReference__c'
+                                onselected={handleObjectSelected} onreset={handleObjectLookupReset} ontypevaluechanged={handleObjectTyped}  rt-name='{selectedObject.recordType}'
+                                -label='Ref Number' number-of-records='100' disabled-field='{objectLookupDisabled}'> 
+                                <!-- #underwritter : if you rollback underWriter, put this params in the element :
+                                    under-writer='{selectedAccount.underWriter}'
+                                    onchange={handleObjectReferenceChange}
+                                --> 
+                            </c-gen_-custom-look-up>
+                        </div>
+                        <div if:false={selectedObject.isQuote}>
+                            <c-gen_-custom-look-up data-id="object-lookup" object-name='{selectedObject.type}' field-name='Name'
+                                onselected={handleObjectSelected} onreset={handleObjectLookupReset} ontypevaluechanged={handleObjectTyped}  rt-name='{selectedObject.recordType}'
+                                -label='Ref Number' number-of-records='100' disabled-field='{objectLookupDisabled}'> 
+                                <!-- #underwritter : if you rollback underWriter, put this params in the element :
+                                    under-writer='{selectedAccount.underWriter}'
+                                    onchange={handleObjectReferenceChange}
+                                --> 
+                            </c-gen_-custom-look-up>
+                        </div>
+                </div>
+                    <!--#underwritter-->
+                        <!-- <div if:true={selectedObject.isClaimObject}>Underwriter code-XXXXX (6 digits) </div> -->
+                    <!--#underwritter-->
+                </div>
+            </div>
+        </div>
+        <div class="slds-col modal-footer slds-modal__footer">
+            <lightning-button class="slds-m-top_small slds-m-right_small" variant="brand" label="Cancel"
+                onclick={closeModal}></lightning-button>
+            <lightning-button class="slds-m-top_small " variant="brand-outline" label="Ready"
+                onclick={handleSendToWebService} disabled={cannotSendRequest}></lightning-button>
+        </div>
+        <lightning-spinner if:true={isLoading} alternative-text="Loading..." variant="brand">
+        </lightning-spinner>
+    </div>
+</template>

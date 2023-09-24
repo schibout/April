@@ -1,0 +1,28 @@
+div input[readonly] {
+    padding-left: 1.75rem !important;  
+}
+.slds-input{
+    padding-left: 1.75rem !important;
+}
+
+.slds-input-has-icon .close {
+    top: 67% !important;
+}
+
+.slds-input-has-icon .lookup {
+    top: 54% !important;
+}
+
+
+.slds-icon_small, .slds-icon--small {
+    width: 1.5rem;
+    height: 1.5rem;
+    line-height: 2;
+}
+.slds-listbox_vertical {
+    max-height: 150px;  
+}
+
+[role=combobox] input[readonly]{
+    padding-left: 70px !important;
+}
