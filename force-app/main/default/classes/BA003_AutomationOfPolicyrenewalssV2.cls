@@ -1,10 +1,24 @@
 global class BA003_AutomationOfPolicyrenewalssV2 implements Database.Batchable<sObject> , Schedulable {
     
     global Database.QueryLocator start(Database.BatchableContext bc){
-        
+        List<AsyncApexJob> previousJobList = [SELECT Id, CompletedDate  FROM AsyncApexJob WHERE ApexClass.Name ='BA003_AutomationOfPolicyrenewalssV2' 
+                                    AND CompletedDate != null ORDER BY CompletedDate desc];
+         Datetime previousRundate ;   
+         Datetime previousRundate ;                            	
+        if (previousJobList.size()> 0)   { previousRundate = previousJobList[0].CompletedDate ;}
+        else {
+            previousRundate = Date.today()-1 ; 
+        }
+
         String query = 'SELECT Id, Contract_No__c, PolicyEndDate__c, TypeOfContract__c,PolicyHolder__r.Name, Name, RecordType.developerName, Category__c, Policy_Is_Auto_Renewed__c  FROM Policy__c WHERE PolicyRenewed__c <> True AND RecordType.DeveloperName = \'PolicyAsiaRT\' AND  Category__c = \'Policy\' AND Contract_No__c = \'\'';
         
-        return Database.getQueryLocator(query);
+        return Database.getQueryLocator([SELECT Id, Contract_No__c, PolicyEndDate__c, TypeOfContract__c
+                                               ,PolicyHolder__r.Name, Name, RecordType.developerName
+                                               , Category__c, Policy_Is_Auto_Renewed__c
+                                                FROM Policy__c WHERE PolicyRenewed__c <> True 
+                                                 AND RecordType.DeveloperName = 'PolicyAsiaRT'
+                                                 AND  Category__c = 'Policy' 
+                                                 AND Contract_No__c = NULL]);
         
     } 
     //Script a exécuter pour lancer le batch : id batchjobid = Database.executeBatch(new BA003_AutomationOfPolicyrenewalssV2());

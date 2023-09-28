@@ -9,8 +9,7 @@
                                         WHERE RecordType.DeveloperName = 'PolicyAsiaRT' 
                                         AND  Category__c = 'Policy' 
                                         AND  PolicyEndDate__c >= :maxLimitDate 
-                                        AND  Contract_No__c = ''
-                                        AND  Id NOT IN ( SELECT Policy__c FROM Case WHERE Status != 'Closed')]);
+                                        AND  Contract_No__c = null ]);
         
     } 
     //Script a exécuter pour lancer le batch : id batchjobid = Database.executeBatch(new BA003_AutomationOfPolicyrenewalssV3());
