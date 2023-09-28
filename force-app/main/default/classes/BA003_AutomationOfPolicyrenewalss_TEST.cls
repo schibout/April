@@ -1,74 +1,44 @@
-/**
-* @author NABIL - Comforth
-* @date 2020 12-28
-* @group UTIL
-* @description Classe de test pour BA003_AutomationOfPolicyrenewalss_TEST
-*/
 @isTest
 public class BA003_AutomationOfPolicyrenewalss_TEST {
     
-    static User adminUser = new TestFactory.UserFactory().createRunningUserAdministrator();
-    
-    @testSetup static void setup(){
-      System.runAs(adminUser){ 
-      }    
+    @testSetup 
+    static void setup() {
+        NberOfDays__c nbrDaysSetting = new NberOfDays__c();
+        nbrDaysSetting.NbrOfDays__c = 60;
+        insert nbrDaysSetting;
+        
+        Account acc = new Account(Name = 'Test1');
+        insert acc;
+        
+        Id recordTypeId = Schema.SObjectType.Policy__c.getRecordTypeInfosByDeveloperName().get('PolicyAsiaRT').getRecordTypeId(); 
+        
+        Date expirationDate = Date.today().addDays(60);
+        
+        List<Policy__c> policiesToInsert = new List<Policy__c>();
+        
+        for(Integer i = 1; i <= 3; i++) {
+            Policy__c newPolicy = new Policy__c();
+            newPolicy.TypeOfContract__c = 'Individual';
+            newPolicy.Name = 'Policy' + i;
+            newPolicy.Category__c = 'Policy';
+            newPolicy.PolicyEndDate__c = expirationDate;
+            newPolicy.RecordTypeId = recordTypeId;
+            policiesToInsert.add(newPolicy);
+        }
+        
+        insert policiesToInsert;
     }
     
-    @isTest   static void testBA003_AutomationOfPolicyrenewalssV2(){ 
-      
-        NberOfDays__c Nberdys= new NberOfDays__c();
-      Nberdys.NbrOfDays__c = 60;
-      insert Nberdys;
-      Id recordTypeId = Schema.SObjectType.Policy__c.getRecordTypeInfosByDeveloperName().get('PolicyAsiaRT').getRecordTypeId(); 
-  
-      Account acc = new Account(Name = 'Test1');
-      insert acc;
+    @isTest 
+    static void testBA003_AutomationOfPolicyrenewalssV2() {
+        Test.StartTest();
+        Database.executeBatch(new BA003_AutomationOfPolicyrenewalssV2(), 200);
+        Test.StopTest();
         
-      Contract contract = new Contract(AccountId = acc.Id);
-      insert contract;
+        List<Policy__c> updatedPolicies = [SELECT Id, PolicyRenewed__c FROM Policy__c WHERE PolicyRenewed__c = TRUE];
+        System.assertEquals(3, updatedPolicies.size(), '3 Policies should be marked as renewed');
         
-      List<Policy__c> listP = [SELECT Id, Contract_No__c, PolicyEndDate__c
-      , TypeOfContract__c,PolicyHolder__r.Name, Name, RecordType.developerName, Category__c
-      , Policy_Is_Auto_Renewed__c  FROM Policy__c ];
-      Date limitDate = date.today().addDays (60);
-      
-      Policy__c polycie1 = new Policy__c();
-      polycie1.TypeOfContract__c = 'Individual';
-      polycie1.Name = 'PGH1000';
-      polycie1.Category__c ='Policy';
-      polycie1.PolicyEndDate__c = limitDate;
-      polycie1.RecordTypeId = recordTypeId;
-      insert polycie1;
-      
-      Policy__c polycie2 = new Policy__c();
-      polycie2.TypeOfContract__c = 'Individual';
-      polycie2.Name = 'H1000';
-      polycie2.Category__c ='Policy';
-      polycie2.PolicyEndDate__c = limitDate;
-      polycie2.RecordTypeId = recordTypeId;
-      insert polycie2;
-        
-      Policy__c polycie3 = new Policy__c();
-      polycie3.TypeOfContract__c = 'Individual';
-      polycie3.Name = 'PGH';
-      polycie3.Category__c ='Policy';
-      polycie3.PolicyEndDate__c = limitDate;
-      polycie3.RecordTypeId = recordTypeId;
-      insert polycie3;
-     
-      Test.StartTest();
-        System.runAs(adminUser){
-            List<Policy__c> listBeforeRun = [SELECT  Id  FROM Policy__c  WHERE PolicyRenewed__c <> True 
-                                            AND RecordType.DeveloperName = 'PolicyAsiaRT'
-                                            AND  Category__c = 'Policy' 
-                                            AND Contract_No__c = NULL
-                                            AND PolicyEndDate__c <=  :limitDate ];
-            system.assertEquals(3, listBeforeRun.size(),'3 Polycies must be selected');
-            BA003_AutomationOfPolicyrenewalssV2.run ();
-            List<Case> listCAfterRun = [SELECT id from Case];
-            system.assertEquals(3, listCAfterRun.size(),'Case must create 3');
-        } 
-        Test.stopTest();
+        List<Case> createdCases = [SELECT Id FROM Case];
+        System.assertEquals(3, createdCases.size(), '3 Cases should be created');
     }
-    
 }
