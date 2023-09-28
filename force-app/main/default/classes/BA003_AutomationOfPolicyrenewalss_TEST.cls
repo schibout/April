@@ -19,48 +19,51 @@ public class BA003_AutomationOfPolicyrenewalss_TEST {
         NberOfDays__c Nberdys= new NberOfDays__c();
       Nberdys.NbrOfDays__c = 60;
       insert Nberdys;
-        
+      Id recordTypeId = Schema.SObjectType.Policy__c.getRecordTypeInfosByDeveloperName().get('PolicyAsiaRT').getRecordTypeId(); 
+  
       Account acc = new Account(Name = 'Test1');
       insert acc;
         
       Contract contract = new Contract(AccountId = acc.Id);
       insert contract;
         
-      List<Policy__c> listP = [SELECT Id, Contract_No__c, PolicyEndDate__c, TypeOfContract__c,PolicyHolder__r.Name, Name, RecordType.developerName, Category__c, Policy_Is_Auto_Renewed__c  FROM Policy__c ];
-      Date myDate = date.today();
+      List<Policy__c> listP = [SELECT Id, Contract_No__c, PolicyEndDate__c
+      , TypeOfContract__c,PolicyHolder__r.Name, Name, RecordType.developerName, Category__c
+      , Policy_Is_Auto_Renewed__c  FROM Policy__c ];
+      Date limitDate = date.today().addDays (60);
       
-      Policy__c pol = new Policy__c();
-      pol.TypeOfContract__c = 'Individual';
-      Pol.Name = 'PGH1000';
-      pol.Category__c ='Policy';
-      pol.PolicyEndDate__c = myDate.addDays (60);
-      insert pol;
+      Policy__c polycie1 = new Policy__c();
+      polycie1.TypeOfContract__c = 'Individual';
+      polycie1.Name = 'PGH1000';
+      polycie1.Category__c ='Policy';
+      polycie1.PolicyEndDate__c = limitDate;
+      polycie1.RecordTypeId = recordTypeId;
+      insert polycie1;
       
-      Policy__c po = new Policy__c();
-      po.TypeOfContract__c = 'Individual';
-      po.Name = 'H1000';
-      po.Category__c ='Policy';
-      po.PolicyEndDate__c = myDate.addDays (60);
-      po.Contract_No__c = pol.Id;
-      insert po;
+      Policy__c polycie2 = new Policy__c();
+      polycie2.TypeOfContract__c = 'Individual';
+      polycie2.Name = 'H1000';
+      polycie2.Category__c ='Policy';
+      polycie2.PolicyEndDate__c = limitDate;
+      polycie2.RecordTypeId = recordTypeId;
+      insert polycie2;
         
-      Policy__c po2 = new Policy__c();
-      po2.TypeOfContract__c = 'Individual';
-      po2.Name = 'PGH';
-      po2.Category__c ='Policy';
-      po2.PolicyEndDate__c = myDate.addDays (60);
-      po2.Contract_No__c = pol.Id;
-      insert po2;
+      Policy__c polycie3 = new Policy__c();
+      polycie3.TypeOfContract__c = 'Individual';
+      polycie3.Name = 'PGH';
+      polycie3.Category__c ='Policy';
+      polycie3.PolicyEndDate__c = limitDate;
+      polycie3.Contract_No__c = polycie1.Id;
+      polycie3.RecordTypeId = recordTypeId;
+      insert polycie3;
      
       Test.StartTest();
         System.runAs(adminUser){
-            Database.executeBatch(new BA003_AutomationOfPolicyrenewalss());
-            List<Case> listC = [SELECT id from Case];
-            system.assertEquals(0, listC.size());
-            
-            BA003_AutomationOfPolicyrenewalss batchCreatCase = new BA003_AutomationOfPolicyrenewalss();
-            String sch = '0 0 23 * * ?'; 
-           // system.schedule( sch, batchCreatCase); 
+            List<Policy__c> listBeforeRun = [SELECT  Id  FROM Policy__c  ];
+            system.assertEquals(3, listBeforeRun.size(),'3 Polycies must be selected');
+            BA003_AutomationOfPolicyrenewalssV2.run ();
+            List<Case> listCAfterRun = [SELECT id from Case];
+            system.assertEquals(2, listCAfterRun.size(),'Case must create 3');
         } 
         Test.stopTest();
     }
