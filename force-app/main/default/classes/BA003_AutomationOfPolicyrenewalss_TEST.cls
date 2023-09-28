@@ -14,7 +14,7 @@ public class BA003_AutomationOfPolicyrenewalss_TEST {
       }    
     }
     
-    @isTest   static void testBA003_AutomationOfPolicyrenewalss(){ 
+    @isTest   static void testBA003_AutomationOfPolicyrenewalssV2(){ 
       
         NberOfDays__c Nberdys= new NberOfDays__c();
       Nberdys.NbrOfDays__c = 60;
@@ -53,17 +53,20 @@ public class BA003_AutomationOfPolicyrenewalss_TEST {
       polycie3.Name = 'PGH';
       polycie3.Category__c ='Policy';
       polycie3.PolicyEndDate__c = limitDate;
-      polycie3.Contract_No__c = polycie1.Id;
       polycie3.RecordTypeId = recordTypeId;
       insert polycie3;
      
       Test.StartTest();
         System.runAs(adminUser){
-            List<Policy__c> listBeforeRun = [SELECT  Id  FROM Policy__c  ];
+            List<Policy__c> listBeforeRun = [SELECT  Id  FROM Policy__c  WHERE PolicyRenewed__c <> True 
+                                            AND RecordType.DeveloperName = 'PolicyAsiaRT'
+                                            AND  Category__c = 'Policy' 
+                                            AND Contract_No__c = NULL
+                                            AND PolicyEndDate__c <=  :limitDate ];
             system.assertEquals(3, listBeforeRun.size(),'3 Polycies must be selected');
             BA003_AutomationOfPolicyrenewalssV2.run ();
             List<Case> listCAfterRun = [SELECT id from Case];
-            system.assertEquals(2, listCAfterRun.size(),'Case must create 3');
+            system.assertEquals(3, listCAfterRun.size(),'Case must create 3');
         } 
         Test.stopTest();
     }

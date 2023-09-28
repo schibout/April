@@ -1,4 +1,5 @@
-global class BA003_AutomationOfPolicyrenewalssV2 implements Database.Batchable<sObject> , Schedulable {
+public class BA003_AutomationOfPolicyrenewalssV4 /*implements Database.Batchable<sObject> , Schedulable*/
+ {
     static Id ownerId = getOwnerId() ;
     static NberOfDays__c nbrDays = NberOfDays__c.getOrgDefaults();
     static Integer nbday = nbrDays.NbrOfDays__c.intValue();
@@ -6,9 +7,9 @@ global class BA003_AutomationOfPolicyrenewalssV2 implements Database.Batchable<s
     private List<Id> successes = new List<Id>();
     private List<Id> failures = new List<Id>();
     private static String result = '';
-    global Database.QueryLocator start(Database.BatchableContext bc){
+    public List<Policy__c> start(){
         System.debug('entering start Mathode');
-        return Database.getQueryLocator([SELECT Id, Contract_No__c, PolicyEndDate__c, TypeOfContract__c
+        return ([SELECT Id, Contract_No__c, PolicyEndDate__c, TypeOfContract__c
                                                ,PolicyHolder__r.Name, Name, RecordType.developerName
                                                , Category__c, Policy_Is_Auto_Renewed__c
                                                 FROM Policy__c WHERE PolicyRenewed__c <> True 
@@ -19,7 +20,7 @@ global class BA003_AutomationOfPolicyrenewalssV2 implements Database.Batchable<s
         
     } 
     
-    global void execute ( Database.BatchableContext bc, List<Policy__c> listPlicy){
+    public void execute (  List<Policy__c> listPlicy){
         System.debug('entering execute Mathode');
         List<Id> insertedCaseIds = new List<Id>();
         List<case> lstNwCases = new List<case>(); 
@@ -100,7 +101,7 @@ global class BA003_AutomationOfPolicyrenewalssV2 implements Database.Batchable<s
         }
         
     }
-    global void finish(Database.BatchableContext bc){
+    public void finish(Database.BatchableContext bc){
         result =
             'Successes: ' +
             successes.size() +
@@ -108,12 +109,14 @@ global class BA003_AutomationOfPolicyrenewalssV2 implements Database.Batchable<s
             failures.size();
     }
     
-    global void execute(SchedulableContext sc){
-        Database.executeBatch(new BA003_AutomationOfPolicyrenewalssV2());
-    }
+    /*public void execute(SchedulableContext sc){
+        Database.executeBatch(new BA003_AutomationOfPolicyrenewalssV4());
+    }*/
     
-    global static void run(){
-        Database.executeBatch(new BA003_AutomationOfPolicyrenewalssV2());
+    public static void run(){
+         BA003_AutomationOfPolicyrenewalssV4 b = new BA003_AutomationOfPolicyrenewalssV4();
+         b.execute(b.start());
+        //Database.executeBatch(new BA003_AutomationOfPolicyrenewalssV4());
     }
     private class BA003_AutomationOfPolicyrenewalsException extends Exception {
         
