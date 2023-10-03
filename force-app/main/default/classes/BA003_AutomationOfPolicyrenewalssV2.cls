@@ -1,11 +1,25 @@
 global class BA003_AutomationOfPolicyrenewalssV2 implements Database.Batchable<sObject> , Schedulable {
     static Id ownerId = getOwnerId() ;
-    static NberOfDays__c nbrDays = NberOfDays__c.getOrgDefaults();
-    static Integer nbday = nbrDays.NbrOfDays__c.intValue();
-    static Date limitDate = date.today().addDays (nbday);
+    static Date limitDate ;
     private List<Id> successes = new List<Id>();
     private List<Id> failures = new List<Id>();
     private static String result = '';
+    private static Date lastRunDateWithSuccess = Date.today();
+    static {
+         NberOfDays__c nbrDays = NberOfDays__c.getOrgDefaults();
+         Integer nbday = nbrDays.NbrOfDays__c.intValue();
+         if (nbday ==null) nbday = 60 ;
+        List<AsyncApexJob> previousJobList = [SELECT Id, CompletedDate  FROM AsyncApexJob 
+                                              WHERE ApexClass.Name ='BA003_AutomationOfPolicyrenewalssV2' 
+                                              AND CompletedDate != null ORDER BY CompletedDate desc];
+        Integer  nbJour = 0 ;
+        if (previousJobList.size()> 0)   { 
+            Date lastRunDateWithSuccess = previousJobList[0].CompletedDate.date(); // Convert DateTime to Date
+            Integer daysSinceLastRun = lastRunDateWithSuccess.daysBetween(Date.today()); // Calculate days between
+            nbday = nbday + daysSinceLastRun - 1 ; // Update nbday batch run everyDay
+        }
+        limitDate = date.today().addDays (nbday);
+    }
     global Database.QueryLocator start(Database.BatchableContext bc){
         System.debug('entering start Mathode');
         return Database.getQueryLocator([SELECT Id, Contract_No__c, PolicyEndDate__c, TypeOfContract__c
@@ -15,7 +29,8 @@ global class BA003_AutomationOfPolicyrenewalssV2 implements Database.Batchable<s
                                                  AND RecordType.DeveloperName = 'PolicyAsiaRT'
                                                  AND  Category__c = 'Policy' 
                                                  AND Contract_No__c = NULL
-                                                 AND PolicyEndDate__c <=  :limitDate ]);
+                                                 AND PolicyEndDate__c >= :lastRunDateWithSuccess
+                                                 AND PolicyEndDate__c <= :limitDate ]);
         
     } 
     
@@ -23,8 +38,16 @@ global class BA003_AutomationOfPolicyrenewalssV2 implements Database.Batchable<s
         System.debug('entering execute Mathode');
         List<Id> insertedCaseIds = new List<Id>();
         List<case> lstNwCases = new List<case>(); 
-        
+        //
+        Map<Id, Case> mapPolicyToCase = new Map<Id, Case>();
+        for(Case c : [SELECT Id, policy__c FROM Case 
+                      WHERE policy__c IN :listPlicy
+                      AND CaseSubtype__c = 'Renewal' ]) {
+            mapPolicyToCase.put(c.policy__c, c);
+        }
+                                                                                    
         for(Policy__c  po: listPlicy ){
+                if (mapPolicyToCase.get(po.Id) != null) continue ;
                 String potype =  po.TypeOfContract__c;
                 lstNwCases.add(createCase(po));
         }
