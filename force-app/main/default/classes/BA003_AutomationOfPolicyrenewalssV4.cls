@@ -74,11 +74,20 @@ global class BA003_AutomationOfPolicyrenewalssV4 implements Database.Batchable<s
     }
 
     global void finish(Database.BatchableContext bc){
-        String result = 'Successes: ' +
-            successes.size() +
-            ' Failures: ' +
-            failures.size();
+        // Votre logique existante
+        String result = 'Successes: ' + successes.size() + ' Failures: ' + failures.size();
+         // Créer un e-mail
+        Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+        // Définir l'adresse e-mail du destinataire
+        String[] toAddresses = new String[] {'it.support@april.asia'};
+        mail.setToAddresses(toAddresses);
+        // Définir l'objet et le corps de l'e-mail
+        mail.setSubject('Notification : Résultat du travail batch');
+        mail.setPlainTextBody('Le travail batch est terminé. ' + result);
+        // Envoyer l'e-mail
+        Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
     }
+    
     
     private List<Id> handleSaveResults(List<Database.SaveResult> saveResults) {
         List<Id> successfulIds = new List<Id>();

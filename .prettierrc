@@ -1,13 +1,26 @@
 {
   "trailingComma": "none",
+  "singleQuote": true,
+  "tabWidth": 4,
+  "bracketSpacing": true,
+  "insertPragma": true,
+  "printWidth": 140,
   "overrides": [
-    {
-      "files": "**/lwc/**/*.html",
-      "options": { "parser": "lwc" }
-    },
-    {
-      "files": "*.{cmp,page,component}",
-      "options": { "parser": "html" }
-    }
+      {
+          "files": ["force-app/**/**/classes/*.cls"],
+          "options": {
+            "apexInsertFinalNewline": true,
+            "apexWrapCollections": "never",
+            "bracketSameLine": true,
+            "bracketSpacing": true,
+            "arrowParens": "always",
+            "embeddedLanguageFormatting": "auto"
+
+          }
+      },
+      {
+          "files": "force-app/**/**/lwc/**/*.html",
+          "options": { "parser": "lwc" }
+      }
   ]
 }
